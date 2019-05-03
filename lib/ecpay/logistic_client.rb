@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'net/http'
 require 'json'
 require 'cgi'
@@ -19,6 +20,26 @@ module Ecpay
     EXPRESS_MAP_END_POINTS = {
       test: 'https://logistics-stage.ecpay.com.tw/Express/map',
       production: 'https://logistics.ecpay.com.tw/Express/map'
+    }.freeze
+
+    C2C_UNIMART_ORDER_INFO_END_POINTS = {
+      test: 'https://logistics-stage.ecpay.com.tw/Express/PrintUniMartC2COrderInfo',
+      production: 'https://logistics.ecpay.com.tw/Express/PrintUniMartC2COrderInfo'
+    }.freeze
+
+    C2C_FAMI_ORDER_INFO_END_POINTS = {
+      test: 'https://logistics-stage.ecpay.com.tw/Express/PrintFAMIC2COrderInfo',
+      production: 'https://logistics.ecpay.com.tw/Express/PrintFAMIC2COrderInfo'
+    }.freeze
+
+    C2C_HILIFE_ORDER_INFO_END_POINTS = {
+      test: 'https://logistics-stage.ecpay.com.tw/Express/PrintHILIFEC2COrderInfo',
+      production: 'https://logistics.ecpay.com.tw/Express/PrintHILIFEC2COrderInfo'
+    }.freeze
+
+    B2C_CVS_AND_HOME_TRADE_DOC_END_POINTS = {
+      test: 'https://logistics-stage.ecpay.com.tw/helper/printTradeDocument',
+      production: 'https://logistics.ecpay.com.tw/helper/printTradeDocument'
     }.freeze
 
     B2C_TEST_OPTIONS = {
@@ -58,53 +79,71 @@ module Ecpay
       @options.freeze
     end
 
-    def generate_checkout_params(overwrite_params = {})
-      generate_params({
-        MerchantTradeNo: SecureRandom.hex(4),
-        MerchantTradeDate: Time.current.strftime('%Y/%m/%d %H:%M:%S'),
-        PaymentType: 'aio',
-        EncryptType: 1
-      }.merge!(overwrite_params))
+    def generate_label_form_data_for_unimart_c2c(params)
+      param_required! params, %i[
+        AllPayLogisticsID
+        CVSPaymentNo
+        CVSValidationNo
+      ]
+
+      # Optional params:
+      # PlatformID
+
+      generate_form_data(:generate_label_form_data_for_unimart_c2c, params)
     end
 
-    # def query_trade_info(merchant_trade_number, platform = nil)
-    #   params = {
-    #     MerchantTradeNo: merchant_trade_number,
-    #     TimeStamp: Time.current.to_i,
-    #     PlatformID: platform
-    #   }
-    #   params.delete_if { |_k, v| v.nil? }
+    def generate_label_form_data_for_fami_c2c(params)
+      param_required! params, %i[
+        AllPayLogisticsID
+        CVSPaymentNo
+      ]
 
-    #   post_params = generate_params(params)
+      # Optional params:
+      # PlatformID
 
-    #   res = request(:query_trade_info, post_params)
+      generate_form_data(:generate_label_form_data_for_fami_c2c, params)
+    end
 
-    #   parse_request_body_to_hash(res)
-    # end
+    def generate_label_form_data_for_hilife_c2c(params)
+      param_required! params, %i[
+        AllPayLogisticsID
+        CVSPaymentNo
+      ]
 
-    # def query_credit_card_period_info(merchant_trade_number)
-    #   params = {
-    #     MerchantTradeNo: merchant_trade_number,
-    #     TimeStamp: Time.current.to_i
-    #   }
-    #   post_params = generate_params(params)
+      # Optional params:
+      # PlatformID
 
-    #   res = request(:query_credit_card_period_info, post_params)
+      generate_form_data(:generate_label_form_data_for_hilife_c2c, params)
+    end
 
-    #   JSON.parse(res.body)
-    # end
+    def generate_label_form_data_for_b2c_and_home(params)
+      param_required! params, %i[
+        AllPayLogisticsID
+      ]
 
-    # private
+      # Optional params:
+      # PlatformID
 
-    # def request(type, params = {})
-    #   case type
-    #   when :query_trade_info
-    #     api_url = EXPRESS_CREATE_API_END_POINTS[@options[:mode]]
-    #   when :query_credit_card_period_info
-    #     api_url = EXPRESS_MAP_END_POINT[@options[:mode]]
-    #   end
+      generate_form_data(:generate_label_form_data_for_b2c_and_home, params)
+    end
 
-    #   Net::HTTP.post_form URI(api_url), post_params
-    # end
+    private
+
+    def generate_form_data(type, params)
+      case type
+      when :generate_label_form_data_for_unimart_c2c
+        api_base = C2C_UNIMART_ORDER_INFO_END_POINTS[@options[:mode]]
+      when :generate_label_form_data_for_fami_c2c
+        api_base = C2C_FAMI_ORDER_INFO_END_POINTS[@options[:mode]]
+      when :generate_label_form_data_for_hilife_c2c
+        api_base = C2C_HILIFE_ORDER_INFO_END_POINTS[@options[:mode]]
+      when :generate_label_form_data_for_b2c_and_home
+        api_base = B2C_CVS_AND_HOME_TRADE_DOC_END_POINTS[@options[:mode]]
+      end
+
+      post_params = generate_params(params.compact)
+
+      OpenStruct.new(api_base: api_base, post_params: post_params)
+    end
   end
 end
