@@ -34,7 +34,7 @@ module Ecpay
       hash_iv: 'q9jcZX8Ib9LM8wYk'
     }.freeze
 
-    SPECIAL_ENCODE_KEYS = %i[CustomerName CustomerAddr CustomerEmail InvoiceRemark ItemName ItemWord ItemRemark].freeze
+    SPECIAL_ENCODE_KEYS = %i[CustomerName CustomerAddr CustomerEmail NotifyMail InvoiceRemark ItemName ItemWord ItemRemark].freeze
     SKIP_CHECK_MAC_KEYS = %i[InvoiceRemark ItemName ItemWord].freeze
 
     attr_reader :options
