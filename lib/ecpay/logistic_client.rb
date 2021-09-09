@@ -37,6 +37,11 @@ module Ecpay
       production: 'https://logistics.ecpay.com.tw/Express/PrintHILIFEC2COrderInfo'
     }.freeze
 
+    C2C_OKMART_ORDER_INFO_END_POINTS = {
+      test: 'https://logistics-stage.ecpay.com.tw/Express/PrintOKMARTC2COrderInfo',
+      production: 'https://logistics.ecpay.com.tw/Express/PrintOKMARTC2COrderInfo'
+    }.freeze
+
     B2C_CVS_AND_HOME_TRADE_DOC_END_POINTS = {
       test: 'https://logistics-stage.ecpay.com.tw/helper/printTradeDocument',
       production: 'https://logistics.ecpay.com.tw/helper/printTradeDocument'
@@ -67,7 +72,7 @@ module Ecpay
         case @options[:logistics_sub_type].try(:to_sym)
         when :FAMI, :UNIMART, :HILIFE, :TCAT, :ECAN
           @options.merge!(B2C_TEST_OPTIONS)
-        when :FAMIC2C, :UNIMARTC2C, :HILIFEC2C
+        when :FAMIC2C, :UNIMARTC2C, :HILIFEC2C, :OKMARTC2C
           @options.merge!(C2C_TEST_OPTIONS)
         else
           raise InvalidLogisticSubType, %(option :logistics_sub_type is not in option list please check document https://www.ecpay.com.tw/Content/files/ecpay_030.pdf)
@@ -116,6 +121,18 @@ module Ecpay
       generate_form_data(:generate_label_form_data_for_hilife_c2c, params)
     end
 
+    def generate_label_form_data_for_okmart_c2c(params)
+      param_required! params, %i[
+        AllPayLogisticsID
+        CVSPaymentNo
+      ]
+
+      # Optional params:
+      # PlatformID
+
+      generate_form_data(:generate_label_form_data_for_okmart_c2c, params)
+    end
+
     def generate_label_form_data_for_b2c_and_home(params)
       param_required! params, %i[
         AllPayLogisticsID
@@ -137,6 +154,8 @@ module Ecpay
         api_base = C2C_FAMI_ORDER_INFO_END_POINTS[@options[:mode]]
       when :generate_label_form_data_for_hilife_c2c
         api_base = C2C_HILIFE_ORDER_INFO_END_POINTS[@options[:mode]]
+      when :generate_label_form_data_for_okmart_c2c
+        api_base = C2C_OKMART_ORDER_INFO_END_POINTS[@options[:mode]]
       when :generate_label_form_data_for_b2c_and_home
         api_base = B2C_CVS_AND_HOME_TRADE_DOC_END_POINTS[@options[:mode]]
       end
