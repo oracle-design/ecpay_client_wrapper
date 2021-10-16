@@ -35,7 +35,7 @@ module Ecpay
     }.freeze
 
     SPECIAL_ENCODE_KEYS = %i[CustomerName CustomerAddr CustomerEmail NotifyMail InvoiceRemark ItemName ItemWord ItemRemark].freeze
-    SKIP_CHECK_MAC_KEYS = %i[InvoiceRemark ItemName ItemWord].freeze
+    SKIP_CHECK_MAC_KEYS = %i[ItemRemark InvoiceRemark PosBarCode ItemName ItemWord QRCode_Left QRCode_Right].freeze
 
     attr_reader :options
 
@@ -167,7 +167,13 @@ module Ecpay
 
       res = request :invoice_search, post_params
 
-      parse_request_body_to_hash(res, decode_keys: [:RtnMsg])
+      check_mac_params = parse_request_body_to_hash(res).reject do |key, _v|
+        SKIP_CHECK_MAC_KEYS.include?(key.to_sym)
+      end
+
+      raise CheckMacError, 'Not valid mac value' unless verify_mac(check_mac_params)
+
+      parse_request_body_to_hash(res, decode_keys: %i[RtnMsg QRCode_Left QRCode_Right IIS_Customer_Name IIS_Customer_Addr ItemName ItemWord InvoiceRemark])
     end
 
     private

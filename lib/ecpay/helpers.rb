@@ -31,13 +31,13 @@ module Ecpay
     private
 
     def parse_request_body_to_hash(res, decode_keys: [])
-      result_hash = Hash[res.body.split('&').map! { |i| i.split('=') }]
+      result_hash = Hash[res.body.split('&').map! { |i| i.split('=', 2) }]
 
       return result_hash if decode_keys.blank?
 
       decode_keys.each do |key|
         key = key.to_s
-        result_hash[key] = CGI::unescape(result_hash[key])
+        result_hash[key] = CGI::unescape(result_hash[key]) if result_hash[key]
       end
 
       result_hash

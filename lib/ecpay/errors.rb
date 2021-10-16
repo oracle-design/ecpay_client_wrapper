@@ -6,4 +6,5 @@ module Ecpay
   class MissingParameter < EcpayError; end
   class InvalidLogisticSubType < EcpayError; end
   class InvalidMode < EcpayError; end
+  class CheckMacError < EcpayError; end
 end
