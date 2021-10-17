@@ -34,8 +34,8 @@ module Ecpay
       hash_iv: 'q9jcZX8Ib9LM8wYk'
     }.freeze
 
-    SPECIAL_ENCODE_KEYS = %i[CustomerName CustomerAddr CustomerEmail NotifyMail InvoiceRemark ItemName ItemWord ItemRemark].freeze
-    SKIP_CHECK_MAC_KEYS = %i[ItemRemark InvoiceRemark PosBarCode ItemName ItemWord QRCode_Left QRCode_Right].freeze
+    SPECIAL_ENCODE_KEYS = %i[CustomerName CustomerAddr CustomerEmail NotifyMail InvoiceRemark ItemName ItemWord ItemRemark Reason].freeze
+    SKIP_CHECK_MAC_KEYS = %i[ItemRemark InvoiceRemark PosBarCode ItemName ItemWord QRCode_Left QRCode_Right Reason].freeze
 
     attr_reader :options
 
@@ -180,7 +180,7 @@ module Ecpay
 
     def request(type, params = {})
       mode = @options[:mode]
-      params_skip_chech_mac = {}
+      params_skip_check_mac = {}
 
       case type
       when :invoice_issue
@@ -201,11 +201,11 @@ module Ecpay
       end
 
       SKIP_CHECK_MAC_KEYS.each do |key|
-        params_skip_chech_mac[key] = params.delete(key)
+        params_skip_check_mac[key] = params.delete(key)
       end
 
       post_params = generate_params(params)
-      post_params.merge!(params_skip_chech_mac)
+      post_params.merge!(params_skip_check_mac)
 
       SPECIAL_ENCODE_KEYS.each do |key|
         next if !post_params[key]
