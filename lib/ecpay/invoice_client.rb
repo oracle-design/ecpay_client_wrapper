@@ -170,6 +170,7 @@ module Ecpay
       check_mac_params = parse_request_body_to_hash(res).reject do |key, _v|
         SKIP_CHECK_MAC_KEYS.include?(key.to_sym)
       end
+      check_mac_params["IIS_Carruer_Num"].gsub!('+', ' ') if check_mac_params["IIS_Carruer_Num"]
 
       raise CheckMacError, 'Not valid mac value' unless verify_mac(check_mac_params)
 
