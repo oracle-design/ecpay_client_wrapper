@@ -70,7 +70,7 @@ module Ecpay
         option_required! :merchant_id, :hash_key, :hash_iv
       when :test
         case @options[:logistics_sub_type].try(:to_sym)
-        when :FAMI, :UNIMART, :HILIFE, :TCAT, :ECAN
+        when :FAMI, :UNIMART, :HILIFE, :TCAT, :ECAN, :UNIMARTFREEZE
           @options.merge!(B2C_TEST_OPTIONS)
         when :FAMIC2C, :UNIMARTC2C, :HILIFEC2C, :OKMARTC2C
           @options.merge!(C2C_TEST_OPTIONS)
