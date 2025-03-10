@@ -59,7 +59,7 @@ logistic_production_client = Ecpay::LogisticClient.new({
   - :UNIMART
   - :HILIFE
   - :TCAT
-  - :ECAN
+  - :POST
   - :FAMIC2C
   - :UNIMARTC2C
   - :HILIFEC2C
