@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'net/http'
 require 'json'
 require 'cgi'
@@ -19,6 +20,11 @@ module Ecpay
     QUERY_TRADE_INFO_API_ENDPOINTS = {
       test: 'https://payment-stage.ecpay.com.tw/Cashier/QueryTradeInfo/V5',
       production: 'https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5'
+    }.freeze
+
+    QUERY_CC_TRADE_INFO_API_ENDPOINTS = {
+      test: nil,
+      production: 'https://payment.ecpay.com.tw/CreditDetail/QueryTrade/V2'
     }.freeze
 
     QUERY_CREDIT_CARD_PERIOD_INFO_API_ENDPOINTS = {
@@ -77,6 +83,20 @@ module Ecpay
       parse_request_body_to_hash(res)
     end
 
+    def query_cc_trade_info(credit_refund_id:, credit_amount:, credit_check_code:)
+      params = {
+        CreditRefundId: credit_refund_id,
+        CreditAmount: credit_amount,
+        CreditCheckCode: credit_check_code
+      }.compact
+
+      post_params = generate_params(params)
+
+      res = request(:query_trade_info, post_params)
+
+      parse_request_body_to_hash(res)
+    end
+
     def query_credit_card_period_info(merchant_trade_number)
       params = {
         MerchantTradeNo: merchant_trade_number,
@@ -110,6 +130,8 @@ module Ecpay
       case type
       when :query_trade_info
         api_url = QUERY_TRADE_INFO_API_ENDPOINTS[@options[:mode]]
+      when :query_cc_trade_info
+        api_url = QUERY_CC_TRADE_INFO_API_ENDPOINTS[@options[:mode]]
       when :query_credit_card_period_info
         api_url = QUERY_CREDIT_CARD_PERIOD_INFO_API_ENDPOINTS[@options[:mode]]
       when :credit_detail_do_action
